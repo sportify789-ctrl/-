@@ -11,6 +11,7 @@ const SHEET_ID = '1fQ1iKyN_55ysGcjgbdYk8rwk4H-3swUW7zw6S5gWtbg';
  * This is crucial for allowing the frontend on GitHub Pages to call the API.
  */
 function doOptions(e) {
+  Logger.log('doOptions function called.');
   return ContentService.createTextOutput()
     .setMimeType(ContentService.MimeType.JSON)
     .addHttpHeader('Access-Control-Allow-Origin', '*')
@@ -22,10 +23,13 @@ function doOptions(e) {
  * Handles POST requests from the web application, acting as the main API endpoint.
  */
 function doPost(e) {
-  let response;
+  Logger.log('doPost function called.');
   try {
+    Logger.log('e.postData.contents: ' + e.postData.contents);
     const body = JSON.parse(e.postData.contents);
     const { action, payload } = body;
+    Logger.log('Action: ' + action);
+    let response;
 
     switch (action) {
       case 'getUserData':
@@ -70,17 +74,20 @@ function doPost(e) {
       default:
         throw new Error(`Unknown action: ${action}`);
     }
-    // [แก้ไข] เพิ่ม .addHttpHeader ที่นี่
+
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: response }))
       .setMimeType(ContentService.MimeType.JSON)
       .addHttpHeader('Access-Control-Allow-Origin', '*');
 
   } catch (error) {
-    Logger.log(error);
-    // [แก้ไข] เพิ่ม .addHttpHeader ที่นี่ด้วย
-    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
+    Logger.log('!!! --- ERROR CAUGHT --- !!!');
+    Logger.log('Error Message: ' + error.message);
+    Logger.log('Error Stack: ' + error.stack);
+    Logger.log('Error Object: ' + JSON.stringify(error));
+
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'เกิดข้อผิดพลาดในสคริปต์: ' + error.message }))
       .setMimeType(ContentService.MimeType.JSON)
-      .addHttpHeader('Access-control-Allow-Origin', '*');
+      .addHttpHeader('Access-Control-Allow-Origin', '*');
   }
 }
 
